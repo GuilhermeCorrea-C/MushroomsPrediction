@@ -3,17 +3,14 @@ import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
-import pickle
 
-# Configurar o título do aplicativo
 st.title("Classificador de Cogumelos 🍄")
 st.write("Este aplicativo prediz se um cogumelo é comestível ou venenoso com base nos atributos fornecidos.")
 
-# 1. Carregar o dataset e preparar os dados
+# Carregar o dataset e preparar os dados
 def carregar_dados():
     url = "https://archive.ics.uci.edu/ml/machine-learning-databases/mushroom/agaricus-lepiota.data"
 
-    # Definir os nomes das colunas conforme a descrição do dataset
     columns = [
         "class", "cap-shape", "cap-surface", "cap-color", "bruises", "odor",
         "gill-attachment", "gill-spacing", "gill-size", "gill-color",
@@ -23,14 +20,11 @@ def carregar_dados():
         "ring-type", "spore-print-color", "population", "habitat"
     ]
 
-    # Carregar o dataset
     df = pd.read_csv(url, header=None, names=columns)
 
-    # Tratar dados faltantes
     df.replace("?", pd.NA, inplace=True)
     df.dropna(inplace=True)
 
-    # Criar LabelEncoder para cada coluna
     label_encoders = {}
     for column in df.columns:
         label_encoders[column] = LabelEncoder()
@@ -38,26 +32,22 @@ def carregar_dados():
 
     return df, label_encoders
 
-# 2. Treinar o modelo
+# Treinar o modelo
 def treinar_modelo(df):
-    # Separar os dados em features (X) e target (y)
-    X = df.drop("class", axis=1)  # 'class' é a coluna alvo
+    X = df.drop("class", axis=1)
     y = df["class"]
 
-    # Dividir os dados em conjuntos de treino e teste
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-    # Treinar o modelo
     model = RandomForestClassifier(random_state=42)
     model.fit(X_train, y_train)
 
     return model
 
-# Carregar os dados e treinar o modelo
 df, label_encoders = carregar_dados()
 model = treinar_modelo(df)
 
-# 3. Criar os inputs do usuário
+# Criar os inputs do usuário
 st.sidebar.header("Insira os atributos do cogumelo")
 user_inputs = {}
 
@@ -74,11 +64,10 @@ for column in columns:
     options = label_encoders[column].classes_
     user_inputs[column] = st.sidebar.selectbox(f"{column}", options)
 
-# Converter inputs para valores numéricos
 user_inputs_encoded = {col: label_encoders[col].transform([user_inputs[col]])[0] for col in columns}
 user_data = pd.DataFrame([user_inputs_encoded])
 
-# 4. Legenda com possíveis valores
+# Legenda com possíveis valores de input
 st.write("---")
 st.subheader("Legenda dos Campos")
 legend = """
@@ -107,12 +96,11 @@ legend = """
 """
 st.markdown(legend)
 
-# 5. Fazer a previsão
+# Fazer a previsão
 if st.button("Prever"):
     prediction = model.predict(user_data)
     predicted_class = label_encoders["class"].inverse_transform(prediction)
 
-    # Exibir resultado
     if predicted_class[0] == "e":
         st.success("O cogumelo é comestível! 🍽️")
     else:
