@@ -42,10 +42,15 @@ def treinar_modelo(df):
     model = RandomForestClassifier(random_state=42)
     model.fit(X_train, y_train)
 
-    return model
+    accuracy = model.score(X_test, y_test)
+
+    return model, accuracy
 
 df, label_encoders = carregar_dados()
-model = treinar_modelo(df)
+model, accuracy = treinar_modelo(df)
+
+# Exibir a acurácia do modelo
+st.write(f"### Acurácia do modelo: {accuracy:.2%}")
 
 # Criar os inputs do usuário
 st.sidebar.header("Insira os atributos do cogumelo")
